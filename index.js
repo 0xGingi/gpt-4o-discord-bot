@@ -42,7 +42,24 @@ client.on('messageCreate', async (message) => {
         const prompt = message.content.slice('!image'.length).trim();
         await generateImage(prompt, message);
     } 
-    //Checks if Discord Voice Message
+    else if (message.content.startsWith('!tts')) {
+        const prompt = message.content.slice('!tts'.length).trim();
+        const chatResponse = await generateResponse(prompt); // Generate a response using the GPT model
+        const ttsResponse = await openai.audio.speech.create({
+            model: 'tts-1',
+            voice: 'nova',
+            input: chatResponse,
+        });
+        const audioBuffer = await ttsResponse.buffer();
+        const audioResponse = {
+            files: [{
+                attachment: audioBuffer,
+                name: 'response.mp3'
+            }]
+        };
+        message.channel.send(audioResponse);
+    }
+        //Checks if Discord Voice Message
     else if (message.attachments.first() && message.attachments.first().name.endsWith('.ogg')) {
         const attachment = message.attachments.first();
         console.log(`Received audio message: ${attachment.url}`);
@@ -62,7 +79,7 @@ client.on('messageCreate', async (message) => {
             voice: 'nova',
             input: chatResponse,
         });
-        
+
         const audioBuffer2 = await ttsResponse.buffer();
         console.log(audioBuffer2);
         const audioResponse = {
