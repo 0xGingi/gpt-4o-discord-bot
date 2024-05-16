@@ -2,6 +2,7 @@ Simple Discord Bot that uses OPENAI API Key, change model/base prompt to whateve
 
 * Responds to messages sent in channels
 * Use !image to generate a image
+* Use !tts to get a tts response
 * Voice Message Conversation (Send Voice Message -> FFMPEG Convert -> Whisper Transcribes -> Generates Response -> TTS)
 * Please Note: This Listens to all messages in every channel it has permissions in by default, so either add a command and splice like I did with !image or manage your channel permissions properly!
 
