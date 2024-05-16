@@ -42,6 +42,8 @@ async function generateResponse(prompt) {
         const response = await openai.chat.completions.create({
             model: 'gpt-4o',
             messages: [{"role": "user", "content": prompt}],
+            //use this instead if you would like a system prompt
+            //messages: [{role: 'system', content: 'You are Bobby Hill'},{"role": "user", "content": prompt}],
             max_tokens: 1024
         });
         return response.choices[0].message.content;
