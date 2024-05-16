@@ -1,5 +1,8 @@
 require('dotenv').config();
 const OpenAI = require('openai');
+const fs = require('fs');
+const fsp = fs.promises;
+const ffmpeg = require('fluent-ffmpeg');
 const { MessageOptions } = require('discord.js');
 const fetch = require('node-fetch');
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
@@ -21,13 +24,56 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
+async function convertAudio(inputFile, outputFile) {
+    return new Promise((resolve, reject) => {
+      ffmpeg(inputFile)
+        .output(outputFile)
+        .on('end', resolve)
+        .on('error', reject)
+        .run();
+    });
+  }
+  
+
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
 
     if (message.content.startsWith('!image')) {
         const prompt = message.content.slice('!image'.length).trim();
         await generateImage(prompt, message);
-    } else {
+    } 
+    //Checks if Discord Voice Message
+    else if (message.attachments.first() && message.attachments.first().name.endsWith('.ogg')) {
+        const attachment = message.attachments.first();
+        console.log(`Received audio message: ${attachment.url}`);
+        const audioBuffer = await fetch(attachment.url).then(res => res.buffer());
+        await fs.promises.writeFile('audio.ogg', audioBuffer);
+        await convertAudio('audio.ogg', 'audio.mp3');
+        //Converting to MP3 For Whisper Model via FFMPEG
+        const whisperResponse = await openai.audio.transcriptions.create({
+            model: 'whisper-1',
+            file: fs.createReadStream('audio.mp3'),
+        });
+        const transcription = whisperResponse.text;
+        const chatResponse = await generateResponse(transcription);
+        // Sending Back as TTS
+        const ttsResponse = await openai.audio.speech.create({
+            model: 'tts-1',
+            voice: 'nova',
+            input: chatResponse,
+        });
+        
+        const audioBuffer2 = await ttsResponse.buffer();
+        console.log(audioBuffer2);
+        const audioResponse = {
+            files: [{
+                attachment: audioBuffer2,
+                name: 'response.mp3'
+            }]
+        };
+        message.channel.send(audioResponse);
+    }
+    else {
         const response = await generateResponse(message.content);
         message.channel.send(response);
     }
