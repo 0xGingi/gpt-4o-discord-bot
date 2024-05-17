@@ -1,10 +1,9 @@
 Simple Discord Bot that uses OPENAI API Key, change model/base prompt to whatever you want
 
-* Responds to messages sent in channels
-* Use !image to generate a image
-* Use !tts to get a tts response
-* Voice Message Conversation (Send Voice Message -> FFMPEG Convert -> Whisper Transcribes -> Generates Response -> TTS)
-* Please Note: This Listens to all messages in every channel it has permissions in by default, so either add a command and splice like I did with !image or manage your channel permissions properly!
+* /chat - send chatgpt a message
+* /image - generate a image
+* /tts - get your chatgpt response in tts
+* /audio - First send a audio file or voice message, the bot will transcribe that audio file, generate a response, and send back the response in tts
 
 ## Installation (REQUIRES FFMPEG AND NODEJS)
 ```git clone https://github.com/0xGingi/gpt-4o-discord-bot && cd gpt-4o-discord-bot```
@@ -13,5 +12,7 @@ Simple Discord Bot that uses OPENAI API Key, change model/base prompt to whateve
 
 ```cp example.env .env```
 (Modify .env now)
+
+```node deploy-commands.js```
 
 ```node index.js```
